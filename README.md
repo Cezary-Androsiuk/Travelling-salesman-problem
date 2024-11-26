@@ -1,1 +1,1 @@
-dzień dobry
+dzień dobry x2
