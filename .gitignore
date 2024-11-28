@@ -2,3 +2,4 @@ env/
 venv/
 tsp-data/
 gui_stuff-tests/
+__pycache__/

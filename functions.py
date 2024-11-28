@@ -1,7 +1,11 @@
 import numpy as np
 from aco import ACO
+import random
 
-
+def randomizeInputData(cities):
+    shuffledCities = cities[:]
+    random.shuffle(shuffledCities)
+    return shuffledCities
 
 def readData(citiesFilePath):
     cities = []
@@ -25,7 +29,7 @@ def readData(citiesFilePath):
     except Exception as e:
         print(f"Cannot open {citiesFilePath}: {e}")
 
-    return cities
+    return randomizeInputData(cities)
 
 def trimData(citiesIn):
     citiesOut = citiesIn
