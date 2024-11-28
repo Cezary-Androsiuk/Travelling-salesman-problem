@@ -4,11 +4,11 @@ from numpy.random import choice as np_choice
 
 class ACO(object):
 
-    def __init__(self, distances, points, n_ants, n_best, n_iterations, decay, alpha=1, beta=1):
+    def __init__(self, distances, points, n_ants, n_best, n_iterations, decay, alpha, beta):
         """
         Args:
             distances (2D numpy.array): Square matrix of distances. Diagonal is assumed to be np.inf.
-            points (list of lists): List that contains the lists with information about the point [x, y, name].
+            points (list of lists): List that contains the lists with information about the points [x, y, name]. Used only to normalize the display after the iteration as the algorithm changes the values.
             n_ants (int): Number of ants running per iteration
             n_best (int): Number of best ants who deposit pheromone
             n_iteration (int): Number of iterations

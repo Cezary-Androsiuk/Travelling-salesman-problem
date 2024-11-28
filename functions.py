@@ -33,6 +33,7 @@ def trimData(citiesIn):
 
     return citiesOut
 
+# Get the necessary info about the point for further computing (x, y, name).
 def getPoints(citiesIn):
     points = []
     for i in range(len(citiesIn)):
@@ -40,6 +41,7 @@ def getPoints(citiesIn):
         points.append(point)
     return points
 
+# Calculate the distance matrix used by the algorithm.
 def getDistanceMatrix(points):
     n = len(points)
     distanceMatrix = np.zeros((n, n))
