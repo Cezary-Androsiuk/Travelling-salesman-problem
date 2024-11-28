@@ -8,7 +8,7 @@ class ACO(object):
         """
         Args:
             distances (2D numpy.array): Square matrix of distances. Diagonal is assumed to be np.inf.
-            points (list of lists): List that contains the lists with information about the points [x, y, name]. Used only to normalize the display after the iteration as the algorithm changes the values.
+            points (list of lists): List that contains the lists with information about the points [x, y, name]. Used only to normalize the display after the iteration as NumPy DataTypes change the values.
             n_ants (int): Number of ants running per iteration
             n_best (int): Number of best ants who deposit pheromone
             n_iteration (int): Number of iterations
