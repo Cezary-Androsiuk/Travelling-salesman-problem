@@ -1,13 +1,16 @@
 import pygame
 import threading
 from time import sleep
+import time
 import queue
 
 
 def startFunction(outputQueue, data, dataHandler):
     
     # compute path - k
+    start = time.time()
     pathData, totalDistance = dataHandler(data)
+    end = time.time()
 
     # console stuff
     print(pathData) #[points:[x1,y1,name1],[x2,y2,name2]..., distances: [distance1-2, distance2-3,...]
@@ -19,6 +22,11 @@ def startFunction(outputQueue, data, dataHandler):
     print(pathData["distances"])
     print("\n\n\n")
     print(f"Total distance: {totalDistance}")
+    print("\n\n\n")
+    print(f"Start time: {start}")
+    print(f"End time: {end}")
+
+    print(f"Total time: {end-start} seconds.")
 
     outputQueue.put(pathData)
 
