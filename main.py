@@ -27,3 +27,13 @@ def readData(citiesFilePath):
 if __name__ == '__main__':
     cities = readData("city.data.txt")
     print(cities)
+
+    # limit data by city or quantity - p
+
+    # display window with info - c 
+
+    # compute path - k
+
+    # display summary - c
+
+    
