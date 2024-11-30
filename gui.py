@@ -7,11 +7,6 @@ import queue
 GUI_DEBUG = False
 
 def startFunction(outputQueue, data, dataHandler):
-    
-    outputData = {
-        "correctlyFinished": False
-    }
-
     try:
         # compute path - k
         start = time.time()
@@ -32,21 +27,27 @@ def startFunction(outputQueue, data, dataHandler):
         print(f"End time: {end}")
 
         print(f"Total time: {end-start} seconds.")
-        outputData = {
+        outputQueue.put({
             "correctlyFinished": True,
             "pathData": pathData,
             "totalDistance": totalDistance
-        }
+        })
     except:
         print("Computing path failed!")
+        outputQueue.put({
+            "correctlyFinished": False
+        })
+        
 
-    outputQueue.put(outputData)
 
 def debugStartFunction(outputQueue, data, dataHandler):
     print(__name__ + " starting")
     sleep(2)
     print(__name__ + " ended")
-    outputQueue.put([])
+    
+    outputQueue.put({
+        "correctlyFinished": False
+    })
 
 def gui(data, dataHandler):
     pygame.init()
@@ -91,8 +92,11 @@ def gui(data, dataHandler):
         if computingFunctionOutput == None:
             textObj = font.render("Loading...", True, textColor)
         else:
+            if computingFunctionOutput["correctlyFinished"]:
+                textObj = font.render("Loaded!", True, textColor)
+            else:
+                textObj = font.render("Failed!", True, textColor)
             # print(1)
-            textObj = font.render("Loaded!", True, textColor)
             # print(computingFunctionOutput)
             
             # add paths stuff here
