@@ -70,10 +70,13 @@ def gui(data, dataHandler):
     textColor =  (230, 230, 230)
     circleColor = (230, 40, 40)
 
-    rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map3.png")
+    initialImageIndex = 3 # 1-5
+    rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map"+str(initialImageIndex)+".png")
     backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
     computingFunctionOutput = None
+    dataLoaded = False
+    dataLoadFailed = False
 
     running = True
     while running:
@@ -82,8 +85,19 @@ def gui(data, dataHandler):
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
+                numberPressed = None
+
+                if event.key == pygame.K_ESCAPE: running = False
+                elif event.key == pygame.K_1: numberPressed = 1
+                elif event.key == pygame.K_2: numberPressed = 2
+                elif event.key == pygame.K_3: numberPressed = 3
+                elif event.key == pygame.K_4: numberPressed = 4
+                elif event.key == pygame.K_5: numberPressed = 5
+
+                if numberPressed != None:
+                    rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map"+str(numberPressed)+".png")
+                    backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
+
             elif event.type == pygame.VIDEORESIZE: # keep window size ratio 1:1
                 oldSize = windowSize[0]
                 newSize = oldSize
@@ -109,22 +123,23 @@ def gui(data, dataHandler):
             pygame.draw.circle(screen, circleColor, (x, y), 4)
 
 
-        if not outputQueue.empty():
+        if not outputQueue.empty(): # queue changes after function finish computing
             computingFunctionOutput = outputQueue.get()
-
-        if computingFunctionOutput == None:
-            textObj = font.render("Loading...", True, textColor)
-        else:
             if computingFunctionOutput["correctlyFinished"]:
-                textObj = font.render("Loaded!", True, textColor)
+                dataLoaded = True
             else:
-                textObj = font.render("Failed!", True, textColor)
-            # print(1)
-            # print(computingFunctionOutput)
-            
+                dataLoadFailed = True
+
+        if dataLoaded:
+            textObj = font.render("Loaded!", True, textColor)
             # add paths stuff here
+        elif dataLoadFailed:
+            textObj = font.render("Failed!", True, textColor)
+        else:
+            textObj = font.render("Loading...", True, textColor)
 
         textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
+        pygame.draw.rect(screen, (0,0,0), textObjRect)
         screen.blit(textObj, textObjRect)
 
         pygame.display.flip()
