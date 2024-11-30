@@ -101,6 +101,7 @@ def gui(data, dataHandler):
     backgroundColor = (30, 30, 30)
     statusTextColor =  (0,0,0)
     statusTextBackgroundColor = (255, 255, 255)
+    firstPointColor = (40, 170, 40)
     pointColor = (170, 40, 40)
     lineColor = (170, 170, 170)
     legendTextColor = (0,0,0)
@@ -166,15 +167,20 @@ def gui(data, dataHandler):
         screen.blit(backgroundImage, (0,0))
         
         # draw cities
+        firstPoint = True
         for city in data:
             normalizedPoint = normalizePoint(city["x"], city["y"])
             ratio = min(windowSize[0], windowSize[1]) / min(startWindowSize[0], startWindowSize[1])
-            pygame.draw.circle(screen, pointColor, normalizedPoint, 4*ratio)
+            if firstPoint:
+                pygame.draw.circle(screen, firstPointColor, normalizedPoint, 4*ratio)
+            else:
+                pygame.draw.circle(screen, pointColor, normalizedPoint, 4*ratio)
             if showCityNames:
                 cityNameObj = cityNameFont.render(city["cityName"], True, cityTextColor)
                 cityNameWidth = cityNameObj.get_width()
                 cityNameHeight = cityNameObj.get_height()
                 screen.blit(cityNameObj, (normalizedPoint[0]-cityNameWidth/2, normalizedPoint[1]-cityNameHeight-10))
+            firstPoint = False
 
 
         
