@@ -73,7 +73,8 @@ def drawTracePath(screen: pygame.Surface, points: list, lineColor: tuple):
 
 def gui(data, dataHandler):
     global originalDataSize, windowSize
-
+    
+    startWindowSize = windowSize
     pygame.init()
     pygame.font.init()
     statusFont = pygame.font.SysFont('arial', 35)
@@ -153,6 +154,13 @@ def gui(data, dataHandler):
                 screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
                 backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
+                # correct size of fonts
+                ratio = min(windowSize[0], windowSize[1]) / min(startWindowSize[0], startWindowSize[1])
+                statusFont = pygame.font.SysFont('arial', int(35 * ratio))
+                legendFont = pygame.font.SysFont('arial', int(14 * ratio))
+                cityNameFont = pygame.font.SysFont('arial', int(11 * ratio))
+                distanceFont = pygame.font.SysFont('arial', int(21 * ratio))
+
 
         screen.fill(backgroundColor)
         screen.blit(backgroundImage, (0,0))
@@ -160,7 +168,8 @@ def gui(data, dataHandler):
         # draw cities
         for city in data:
             normalizedPoint = normalizePoint(city["x"], city["y"])
-            pygame.draw.circle(screen, pointColor, normalizedPoint, 4)
+            ratio = min(windowSize[0], windowSize[1]) / min(startWindowSize[0], startWindowSize[1])
+            pygame.draw.circle(screen, pointColor, normalizedPoint, 4*ratio)
             if showCityNames:
                 cityNameObj = cityNameFont.render(city["cityName"], True, cityTextColor)
                 cityNameWidth = cityNameObj.get_width()
