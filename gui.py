@@ -76,7 +76,9 @@ def gui(data, dataHandler):
 
     pygame.init()
     pygame.font.init()
-    font = pygame.font.SysFont('lato', 45)
+    statusFont = pygame.font.SysFont('lato', 45)
+    infoFont = pygame.font.SysFont('lato', 20)
+    cityNameFont = pygame.font.SysFont('lato', 16)
     screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
     # screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE + pygame.NOFRAME)
     pygame.display.set_caption("Traveling Salesman Problem")
@@ -91,9 +93,12 @@ def gui(data, dataHandler):
 
     # color stuff
     backgroundColor = (30, 30, 30)
-    textColor =  (230, 230, 230)
+    statusTextColor =  (0,0,0)
+    statusTextBackgroundColor = (255, 255, 255)
     pointColor = (170, 40, 40)
     lineColor = (170, 170, 170)
+    legendTextColor = (0,0,0)
+    cityTextColor = (170,40,40)
 
 
     initialImageIndex = 3 # 1-5
@@ -104,6 +109,7 @@ def gui(data, dataHandler):
     runtimeFunctionOutput = None
     dataLoadedCorrectly = False
     dataLoadFailed = False
+    showCityNames = False
 
     running = True
     while running:
@@ -115,11 +121,12 @@ def gui(data, dataHandler):
                 numberPressed = None
 
                 if event.key == pygame.K_ESCAPE: running = False
-                elif event.key == pygame.K_1: numberPressed = 1
-                elif event.key == pygame.K_2: numberPressed = 2
-                elif event.key == pygame.K_3: numberPressed = 3
-                elif event.key == pygame.K_4: numberPressed = 4
-                elif event.key == pygame.K_5: numberPressed = 5
+                if event.key == pygame.K_v: showCityNames = (False if showCityNames else True)
+                elif event.key == pygame.K_1 or event.key == pygame.K_KP1: numberPressed = 1
+                elif event.key == pygame.K_2 or event.key == pygame.K_KP2: numberPressed = 2
+                elif event.key == pygame.K_3 or event.key == pygame.K_KP3: numberPressed = 3
+                elif event.key == pygame.K_4 or event.key == pygame.K_KP4: numberPressed = 4
+                elif event.key == pygame.K_5 or event.key == pygame.K_KP5: numberPressed = 5
 
                 if numberPressed != None:
                     rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map"+str(numberPressed)+".png")
@@ -148,6 +155,12 @@ def gui(data, dataHandler):
         for city in data:
             normalizedPoint = normalizePoint(city["x"], city["y"])
             pygame.draw.circle(screen, pointColor, normalizedPoint, 4)
+            if showCityNames:
+                cityNameObj = cityNameFont.render(city["cityName"], True, cityTextColor)
+                cityNameWidth = cityNameObj.get_width()
+                cityNameHeight = cityNameObj.get_height()
+                screen.blit(cityNameObj, (normalizedPoint[0]-cityNameWidth/2, normalizedPoint[1]-cityNameHeight-10))
+
 
         
         # react on computing finished
@@ -159,16 +172,16 @@ def gui(data, dataHandler):
                 dataLoadFailed = True
 
         if dataLoadedCorrectly:
-            # textObj = font.render("Loaded!", True, textColor)
+            # textObj = statusFont.render("Loaded!", True, statusTextColor)
             textObj = None
 
             # draw paths between cities
             points = computingFunctionOutput["pathData"]["points"]
             drawTracePath(screen, points, lineColor)
         elif dataLoadFailed:
-            textObj = font.render("Computing Failed!", True, textColor)
+            textObj = statusFont.render("Computing Failed!", True, statusTextColor)
         else:
-            textObj = font.render("Computing...", True, textColor)
+            textObj = statusFont.render("Computing...", True, statusTextColor)
 
             # if any new data shows up, then draw it
             if not runtimeQueue.empty(): # read the newest
@@ -185,9 +198,19 @@ def gui(data, dataHandler):
         # draw info text if exist
         if textObj != None:
             textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
-            pygame.draw.rect(screen, (0,0,0), textObjRect)
+            pygame.draw.rect(screen, statusTextBackgroundColor, textObjRect)
             screen.blit(textObj, textObjRect)
 
+        # show legend
+        legendXOffset = 10
+        legendYOffset = 10
+        legend1Obj = infoFont.render("to change map use keys 1,2,3,4 or 5", True, legendTextColor)
+        legend2Obj = infoFont.render("to display or hide cities names press V", True, legendTextColor)
+        legend2YPos = windowSize[1] - legend2Obj.get_height()
+        legend1YPos = legend2YPos - legend2Obj.get_height()
+        screen.blit(legend1Obj, (legendXOffset, legend1YPos - legendYOffset))
+        screen.blit(legend2Obj, (legendXOffset, legend2YPos - legendYOffset))
+        
         pygame.display.flip() # update window with new data
 
         if not dataLoadedCorrectly:
