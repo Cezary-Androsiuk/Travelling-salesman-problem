@@ -1,6 +1,7 @@
 import random as rn
 import numpy as np
 from numpy.random import choice as np_choice
+import queue
 
 class ACO(object):
 
@@ -30,7 +31,7 @@ class ACO(object):
         self.alpha = alpha
         self.beta = beta
 
-    def run(self):
+    def run(self, guiQueue: queue.Queue):
         shortest_path = None
         all_time_shortest_path = ("placeholder", np.inf)
         for i in range(self.n_iterations):
@@ -54,6 +55,7 @@ class ACO(object):
             print(f"Points: {path_data['points']}")
             print(f"Distances: {path_data['distances']}")
             print(f"Total distance: {total_distance:.2f}\n")
+            guiQueue.put(path_data['points'])
 
             # Update all-time shortest path
             if total_distance < all_time_shortest_path[1]:

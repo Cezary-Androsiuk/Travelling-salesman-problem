@@ -1,6 +1,7 @@
 import numpy as np
 from aco import ACO
 import random
+import queue
 
 def randomizeInputData(cities):
     shuffledCities = cities[:]
@@ -56,13 +57,13 @@ def getDistanceMatrix(points):
     return distanceMatrix
 
 
-def computePaths(citiesIn):
+def computePaths(citiesIn, guiQueue: queue.Queue):
     points = getPoints(citiesIn)  # Get [x, y, cityName]
     distanceMatrix = getDistanceMatrix(points)
 
     # Run ACO algorithm
     aco = ACO(distanceMatrix, points, 10, 5, 100, 0.95, 1, 1)  # Adjusted parameters
-    shortest = aco.run()
+    shortest = aco.run(guiQueue)
 
     shortest_indices = shortest[0]  # Indices of cities in the shortest path
     shortest_distance = shortest[1]  # Total distance of the shortest path

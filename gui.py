@@ -6,7 +6,7 @@ import queue
 
 GUI_DEBUG = False
 
-def debugStartFunction(outputQueue, data, dataHandler):
+def debugStartFunction(outputQueue, runtimeQueue, data, dataHandler):
     print(__name__ + " starting")
     sleep(2)
     print(__name__ + " ended")
@@ -26,11 +26,11 @@ originalDataSize = (2000, 2000)
 windowSize = (900, 900)
 
 
-def startFunction(outputQueue, data, dataHandler):
+def startFunction(outputQueue, runtimeQueue, data, dataHandler):
     try:
         # compute path - k
         start = time.time()
-        pathData, totalDistance = dataHandler(data)
+        pathData, totalDistance = dataHandler(data, runtimeQueue)
         end = time.time()
         # console stuff
         print(pathData) #[points:[x1,y1,name1],[x2,y2,name2]..., distances: [distance1-2, distance2-3,...]
@@ -64,6 +64,12 @@ def normalizePoint(x: int, y: int):
     normalizedY = (y/originalDataSize[1]) * windowSize[1]
     return (normalizedX, normalizedY)
     
+def drawTracePath(screen: pygame.Surface, points: list, lineColor: tuple):
+    pointsCount = len(points)
+    for i in range(pointsCount-1):
+        start_pos = normalizePoint(points[i][0], points[i][1])
+        end_pos = normalizePoint(points[i+1][0], points[i+1][1])
+        pygame.draw.line(screen, lineColor, start_pos, end_pos, width=1)
 
 def gui(data, dataHandler):
     global originalDataSize, windowSize
@@ -77,9 +83,10 @@ def gui(data, dataHandler):
     clock = pygame.time.Clock()
     
     outputQueue = queue.Queue()
+    runtimeQueue = queue.Queue()
 
     computingFunction = debugStartFunction if GUI_DEBUG else startFunction
-    taskThread = threading.Thread(target=computingFunction, args=(outputQueue, data, dataHandler))
+    taskThread = threading.Thread(target=computingFunction, args=(outputQueue, runtimeQueue, data, dataHandler))
     taskThread.start()
 
     # color stuff
@@ -94,6 +101,7 @@ def gui(data, dataHandler):
     backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
     computingFunctionOutput = None
+    runtimeFunctionOutput = None
     dataLoadedCorrectly = False
     dataLoadFailed = False
 
@@ -141,7 +149,7 @@ def gui(data, dataHandler):
             normalizedPoint = normalizePoint(city["x"], city["y"])
             pygame.draw.circle(screen, pointColor, normalizedPoint, 4)
 
-
+        
         # react on computing finished
         if not outputQueue.empty(): # queue changes after function finish computing
             computingFunctionOutput = outputQueue.get()
@@ -156,15 +164,23 @@ def gui(data, dataHandler):
 
             # draw paths between cities
             points = computingFunctionOutput["pathData"]["points"]
-            pointsCount = len(points)
-            for i in range(pointsCount-1):
-                start_pos = normalizePoint(points[i][0], points[i][1])
-                end_pos = normalizePoint(points[i+1][0], points[i+1][1])
-                pygame.draw.line(screen, lineColor, start_pos, end_pos, width=1)
+            drawTracePath(screen, points, lineColor)
         elif dataLoadFailed:
             textObj = font.render("Computing Failed!", True, textColor)
         else:
             textObj = font.render("Computing...", True, textColor)
+
+            # if any new data shows up, then draw it
+            if not runtimeQueue.empty(): # read the newest
+                runtimeFunctionOutput = runtimeQueue.get()
+                
+                # remove oldest if exists
+                while not runtimeQueue.empty():
+                    runtimeQueue.get_nowait();
+
+            # draw the newest element
+            drawTracePath(screen, runtimeFunctionOutput, lineColor)
+
         
         # draw info text if exist
         if textObj != None:
