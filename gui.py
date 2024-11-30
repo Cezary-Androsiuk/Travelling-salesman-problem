@@ -65,6 +65,8 @@ def normalizePoint(x: int, y: int):
     return (normalizedX, normalizedY)
     
 def drawTracePath(screen: pygame.Surface, points: list, lineColor: tuple):
+    if points == None:
+        return
     pointsCount = len(points)
     for i in range(pointsCount-1):
         start_pos = normalizePoint(points[i][0], points[i][1])
@@ -100,7 +102,7 @@ def gui(data, dataHandler):
     # color stuff
     backgroundColor = (30, 30, 30)
     statusTextColor =  (0,0,0)
-    statusTextBackgroundColor = (255, 255, 255)
+    textBackgroundColor = (255, 255, 255)
     firstPointColor = (40, 170, 40)
     pointColor = (170, 40, 40)
     lineColor = (170, 170, 170)
@@ -109,7 +111,7 @@ def gui(data, dataHandler):
     cityTextColor = (170,40,40)
 
 
-    initialImageIndex = 3 # 1-5
+    initialImageIndex = 3 # 0-5
     rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map"+str(initialImageIndex)+".png")
     backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
@@ -130,6 +132,7 @@ def gui(data, dataHandler):
 
                 if event.key == pygame.K_ESCAPE: running = False
                 if event.key == pygame.K_v: showCityNames = (False if showCityNames else True)
+                elif event.key == pygame.K_0 or event.key == pygame.K_KP0: numberPressed = 0
                 elif event.key == pygame.K_1 or event.key == pygame.K_KP1: numberPressed = 1
                 elif event.key == pygame.K_2 or event.key == pygame.K_KP2: numberPressed = 2
                 elif event.key == pygame.K_3 or event.key == pygame.K_KP3: numberPressed = 3
@@ -224,12 +227,13 @@ def gui(data, dataHandler):
         # draw info text if exist
         if textObj != None:
             textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
-            pygame.draw.rect(screen, statusTextBackgroundColor, textObjRect)
+            pygame.draw.rect(screen, textBackgroundColor, textObjRect)
             screen.blit(textObj, textObjRect)
 
         # draw distance 
         distanceXPos = windowSize[0]/2 - distanceTextObj.get_width()/2
         distanceYPos = windowSize[1] - distanceTextObj.get_height() - 10
+        pygame.draw.rect(screen, textBackgroundColor, (distanceXPos-5, distanceYPos-5, distanceTextObj.get_width()+10, distanceTextObj.get_height()+10))
         screen.blit(distanceTextObj, (distanceXPos, distanceYPos))
 
         # show legend
@@ -239,6 +243,8 @@ def gui(data, dataHandler):
         legend2Obj = legendFont.render("to display or hide city names, press V", True, legendTextColor)
         legend2YPos = windowSize[1] - legend2Obj.get_height()
         legend1YPos = legend2YPos - legend2Obj.get_height()
+        pygame.draw.rect(screen, textBackgroundColor, (legendXOffset-5, legend1YPos - legendYOffset-5, legend1Obj.get_width()+10, legend1Obj.get_height()+10))
+        pygame.draw.rect(screen, textBackgroundColor, (legendXOffset-5, legend2YPos - legendYOffset-5, legend2Obj.get_width()+10, legend2Obj.get_height()+10))
         screen.blit(legend1Obj, (legendXOffset, legend1YPos - legendYOffset))
         screen.blit(legend2Obj, (legendXOffset, legend2YPos - legendYOffset))
         
