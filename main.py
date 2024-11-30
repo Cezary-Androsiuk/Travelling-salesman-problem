@@ -8,8 +8,4 @@ if __name__ == '__main__':
     # limit data by city or quantity - p
     cities = trimData(cities)
 
-
     gui(data=cities, dataHandler=computePaths)
-
-
-    

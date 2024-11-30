@@ -6,6 +6,26 @@ import queue
 
 GUI_DEBUG = False
 
+def debugStartFunction(outputQueue, data, dataHandler):
+    print(__name__ + " starting")
+    sleep(2)
+    print(__name__ + " ended")
+    
+    outputQueue.put({
+        "correctlyFinished": False
+    })
+
+# distance between Białystok(1721, 615) and Szczecin(120, 524) in our data is 1603.5841106721
+# distance between these cities in real world is 573165.1m, or 573.17 km
+# then ratio are:
+REALISTIC_DISTANCE_RATIO_M = 573165.1/1603.5841106721
+REALISTIC_DISTANCE_RATIO_KM = 573.17/1603.5841106721
+
+
+originalDataSize = (2000, 2000)
+windowSize = (900, 900)
+
+
 def startFunction(outputQueue, data, dataHandler):
     try:
         # compute path - k
@@ -37,30 +57,20 @@ def startFunction(outputQueue, data, dataHandler):
         outputQueue.put({
             "correctlyFinished": False
         })
-        
 
-
-def debugStartFunction(outputQueue, data, dataHandler):
-    print(__name__ + " starting")
-    sleep(2)
-    print(__name__ + " ended")
-    
-    outputQueue.put({
-        "correctlyFinished": False
-    })
-
-def normalizePoint(x: int, y: int, rawBackgroundImageSize, windowSize):
-    normalizedX = (x/rawBackgroundImageSize[0]) * windowSize[0]
-    normalizedY = (y/rawBackgroundImageSize[1]) * windowSize[1]
+def normalizePoint(x: int, y: int):
+    global originalDataSize, windowSize
+    normalizedX = (x/originalDataSize[0]) * windowSize[0]
+    normalizedY = (y/originalDataSize[1]) * windowSize[1]
     return (normalizedX, normalizedY)
     
 
 def gui(data, dataHandler):
+    global originalDataSize, windowSize
+
     pygame.init()
     pygame.font.init()
     font = pygame.font.SysFont('lato', 45)
-    rawBackgroundImageSize = (2000, 2000)
-    windowSize = (700, 700)
     screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
     # screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE + pygame.NOFRAME)
     pygame.display.set_caption("Traveling Salesman Problem")
@@ -84,7 +94,7 @@ def gui(data, dataHandler):
     backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
     computingFunctionOutput = None
-    dataLoaded = False
+    dataLoadedCorrectly = False
     dataLoadFailed = False
 
     running = True
@@ -126,42 +136,45 @@ def gui(data, dataHandler):
         screen.fill(backgroundColor)
         screen.blit(backgroundImage, (0,0))
         
-        # draw points
+        # draw cities
         for city in data:
-            normalizedPoint = normalizePoint(city["x"], city["y"], rawBackgroundImageSize, windowSize)
+            normalizedPoint = normalizePoint(city["x"], city["y"])
             pygame.draw.circle(screen, pointColor, normalizedPoint, 4)
 
 
+        # react on computing finished
         if not outputQueue.empty(): # queue changes after function finish computing
             computingFunctionOutput = outputQueue.get()
             if computingFunctionOutput["correctlyFinished"]:
-                dataLoaded = True
+                dataLoadedCorrectly = True
             else:
                 dataLoadFailed = True
 
-        if dataLoaded:
-            textObj = font.render("Loaded!", True, textColor)
+        if dataLoadedCorrectly:
+            # textObj = font.render("Loaded!", True, textColor)
             textObj = None
 
+            # draw paths between cities
             points = computingFunctionOutput["pathData"]["points"]
             pointsCount = len(points)
             for i in range(pointsCount-1):
-                start_pos = normalizePoint(points[i][0], points[i][1], rawBackgroundImageSize, windowSize)
-                end_pos = normalizePoint(points[i+1][0], points[i+1][1], rawBackgroundImageSize, windowSize)
+                start_pos = normalizePoint(points[i][0], points[i][1])
+                end_pos = normalizePoint(points[i+1][0], points[i+1][1])
                 pygame.draw.line(screen, lineColor, start_pos, end_pos, width=1)
-
-            # add paths stuff here
         elif dataLoadFailed:
-            textObj = font.render("Failed!", True, textColor)
+            textObj = font.render("Computing Failed!", True, textColor)
         else:
             textObj = font.render("Computing...", True, textColor)
         
+        # draw info text if exist
         if textObj != None:
             textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
             pygame.draw.rect(screen, (0,0,0), textObjRect)
             screen.blit(textObj, textObjRect)
 
-        pygame.display.flip()
-        clock.tick(20) # limit fps to 20
+        pygame.display.flip() # update window with new data
+
+        if not dataLoadedCorrectly:
+            clock.tick(30) # limit fps to 10 frames per second, to not disturb computing algorithm
 
     pygame.quit()
