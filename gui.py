@@ -49,10 +49,17 @@ def debugStartFunction(outputQueue, data, dataHandler):
         "correctlyFinished": False
     })
 
+def normalizePoint(x: int, y: int, rawBackgroundImageSize, windowSize):
+    normalizedX = (x/rawBackgroundImageSize[0]) * windowSize[0]
+    normalizedY = (y/rawBackgroundImageSize[1]) * windowSize[1]
+    return (normalizedX, normalizedY)
+    
+
 def gui(data, dataHandler):
     pygame.init()
     pygame.font.init()
     font = pygame.font.SysFont('lato', 45)
+    rawBackgroundImageSize = (2000, 2000)
     windowSize = (700, 700)
     screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
     # screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE + pygame.NOFRAME)
@@ -68,7 +75,9 @@ def gui(data, dataHandler):
     # color stuff
     backgroundColor = (30, 30, 30)
     textColor =  (230, 230, 230)
-    circleColor = (230, 40, 40)
+    pointColor = (170, 40, 40)
+    lineColor = (170, 170, 170)
+
 
     initialImageIndex = 3 # 1-5
     rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map"+str(initialImageIndex)+".png")
@@ -116,11 +125,11 @@ def gui(data, dataHandler):
 
         screen.fill(backgroundColor)
         screen.blit(backgroundImage, (0,0))
-
+        
+        # draw points
         for city in data:
-            x = (city["x"]/2000) * windowSize[0]
-            y = (city["y"]/2000) * windowSize[1]
-            pygame.draw.circle(screen, circleColor, (x, y), 4)
+            normalizedPoint = normalizePoint(city["x"], city["y"], rawBackgroundImageSize, windowSize)
+            pygame.draw.circle(screen, pointColor, normalizedPoint, 4)
 
 
         if not outputQueue.empty(): # queue changes after function finish computing
@@ -132,15 +141,25 @@ def gui(data, dataHandler):
 
         if dataLoaded:
             textObj = font.render("Loaded!", True, textColor)
+            textObj = None
+
+            points = computingFunctionOutput["pathData"]["points"]
+            pointsCount = len(points)
+            for i in range(pointsCount-1):
+                start_pos = normalizePoint(points[i][0], points[i][1], rawBackgroundImageSize, windowSize)
+                end_pos = normalizePoint(points[i+1][0], points[i+1][1], rawBackgroundImageSize, windowSize)
+                pygame.draw.line(screen, lineColor, start_pos, end_pos, width=1)
+
             # add paths stuff here
         elif dataLoadFailed:
             textObj = font.render("Failed!", True, textColor)
         else:
-            textObj = font.render("Loading...", True, textColor)
-
-        textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
-        pygame.draw.rect(screen, (0,0,0), textObjRect)
-        screen.blit(textObj, textObjRect)
+            textObj = font.render("Computing...", True, textColor)
+        
+        if textObj != None:
+            textObjRect = textObj.get_rect(center=(windowSize[0]/2, windowSize[1]/2))
+            pygame.draw.rect(screen, (0,0,0), textObjRect)
+            screen.blit(textObj, textObjRect)
 
         pygame.display.flip()
         clock.tick(20) # limit fps to 20
