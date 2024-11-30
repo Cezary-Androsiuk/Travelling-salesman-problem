@@ -52,10 +52,12 @@ def debugStartFunction(outputQueue, data, dataHandler):
 def gui(data, dataHandler):
     pygame.init()
     pygame.font.init()
-    font = pygame.font.SysFont('lato', 35)
-    windowSize = (1280, 720)
-    screen = pygame.display.set_mode(windowSize)
+    font = pygame.font.SysFont('lato', 45)
+    windowSize = (700, 700)
+    screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
+    # screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE + pygame.NOFRAME)
     pygame.display.set_caption("Traveling Salesman Problem")
+    clock = pygame.time.Clock()
     
     outputQueue = queue.Queue()
 
@@ -66,9 +68,10 @@ def gui(data, dataHandler):
     # color stuff
     backgroundColor = (30, 30, 30)
     textColor =  (230, 230, 230)
+    circleColor = (230, 40, 40)
 
-    backgroundImage = pygame.image.load("./country_maps/Poland-Map3.png")
-    backgroundImage = pygame.transform.scale(backgroundImage, windowSize)
+    rawBackgroundImage = pygame.image.load("./country_maps/Poland-Map3.png")
+    backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
 
     computingFunctionOutput = None
 
@@ -81,9 +84,29 @@ def gui(data, dataHandler):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+            elif event.type == pygame.VIDEORESIZE: # keep window size ratio 1:1
+                oldSize = windowSize[0]
+                newSize = oldSize
+
+                if event.w != oldSize and event.h != oldSize:
+                    newSize = min(event.w, event.h)
+                elif event.w != oldSize:
+                    newSize = event.w
+                elif event.h != oldSize:
+                    newSize = event.h
+
+                windowSize = (newSize, newSize)
+                screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
+                backgroundImage = pygame.transform.scale(rawBackgroundImage, windowSize)
+
 
         screen.fill(backgroundColor)
-        
+        screen.blit(backgroundImage, (0,0))
+
+        for city in data:
+            x = (city["x"]/2000) * windowSize[0]
+            y = (city["y"]/2000) * windowSize[1]
+            pygame.draw.circle(screen, circleColor, (x, y), 4)
 
 
         if not outputQueue.empty():
@@ -105,5 +128,6 @@ def gui(data, dataHandler):
         screen.blit(textObj, textObjRect)
 
         pygame.display.flip()
+        clock.tick(20) # limit fps to 20
 
     pygame.quit()
