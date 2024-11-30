@@ -76,9 +76,14 @@ def gui(data, dataHandler):
 
     pygame.init()
     pygame.font.init()
-    statusFont = pygame.font.SysFont('lato', 45)
-    infoFont = pygame.font.SysFont('lato', 20)
-    cityNameFont = pygame.font.SysFont('lato', 16)
+    statusFont = pygame.font.SysFont('arial', 35)
+    legendFont = pygame.font.SysFont('arial', 14)
+    cityNameFont = pygame.font.SysFont('arial', 11)
+    distanceFont = pygame.font.SysFont('arial', 21)
+    # statusFont = pygame.font.SysFont('lato', 45)
+    # legendFont = pygame.font.SysFont('lato', 20)
+    # cityNameFont = pygame.font.SysFont('lato', 16)
+    # distanceFont = pygame.font.SysFont('lato', 30)
     screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE)
     # screen = pygame.display.set_mode(windowSize, pygame.RESIZABLE + pygame.NOFRAME)
     pygame.display.set_caption("Traveling Salesman Problem")
@@ -98,6 +103,7 @@ def gui(data, dataHandler):
     pointColor = (170, 40, 40)
     lineColor = (170, 170, 170)
     legendTextColor = (0,0,0)
+    distanceTextColor = (0,0,0)
     cityTextColor = (170,40,40)
 
 
@@ -171,9 +177,13 @@ def gui(data, dataHandler):
             else:
                 dataLoadFailed = True
 
+
         if dataLoadedCorrectly:
             # textObj = statusFont.render("Loaded!", True, statusTextColor)
             textObj = None
+            realDistance = computingFunctionOutput["totalDistance"] * REALISTIC_DISTANCE_RATIO_KM
+            realDistance = round(realDistance, 2)
+            distanceTextObj = distanceFont.render("Distance: " + str(realDistance) + " km", True, distanceTextColor)
 
             # draw paths between cities
             points = computingFunctionOutput["pathData"]["points"]
@@ -182,6 +192,7 @@ def gui(data, dataHandler):
             textObj = statusFont.render("Computing Failed!", True, statusTextColor)
         else:
             textObj = statusFont.render("Computing...", True, statusTextColor)
+            distanceTextObj = distanceFont.render("Distance: [computing...]", True, distanceTextColor)
 
             # if any new data shows up, then draw it
             if not runtimeQueue.empty(): # read the newest
@@ -201,11 +212,16 @@ def gui(data, dataHandler):
             pygame.draw.rect(screen, statusTextBackgroundColor, textObjRect)
             screen.blit(textObj, textObjRect)
 
+        # draw distance 
+        distanceXPos = windowSize[0]/2 - distanceTextObj.get_width()/2
+        distanceYPos = windowSize[1] - distanceTextObj.get_height() - 10
+        screen.blit(distanceTextObj, (distanceXPos, distanceYPos))
+
         # show legend
         legendXOffset = 10
         legendYOffset = 10
-        legend1Obj = infoFont.render("to change map use keys 1,2,3,4 or 5", True, legendTextColor)
-        legend2Obj = infoFont.render("to display or hide cities names press V", True, legendTextColor)
+        legend1Obj = legendFont.render("to change map use keys 1,2,3,4 or 5", True, legendTextColor)
+        legend2Obj = legendFont.render("to display or hide city names, press V", True, legendTextColor)
         legend2YPos = windowSize[1] - legend2Obj.get_height()
         legend1YPos = legend2YPos - legend2Obj.get_height()
         screen.blit(legend1Obj, (legendXOffset, legend1YPos - legendYOffset))
