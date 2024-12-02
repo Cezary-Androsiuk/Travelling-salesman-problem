@@ -3,3 +3,4 @@ venv/
 tsp-data/
 gui_stuff-tests/
 __pycache__/
+.idea/

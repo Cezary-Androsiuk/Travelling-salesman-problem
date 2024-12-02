@@ -2,6 +2,7 @@ import numpy as np
 from aco import ACO
 import random
 import queue
+import os
 
 def randomizeInputData(cities):
     shuffledCities = cities[:]
@@ -23,8 +24,8 @@ def readData(citiesFilePath):
                 cities.append(dict(
                     index=i, 
                     x=int(values[0]), y=int(values[1]), 
-                    cityName=cityName, 
-                    population=values[3]
+                    cityName=cityName,
+                    population=int(values[3])
                 ))
                 i+=1
     except Exception as e:
@@ -34,8 +35,24 @@ def readData(citiesFilePath):
 
 def trimData(citiesIn):
     citiesOut = citiesIn
+    selection_file = "selection.txt"
 
+    if os.path.exists(selection_file):
+        with open(selection_file, 'r', encoding='utf-8') as file:
+            lines = [line.strip() for line in file if line.strip()]
 
+        if lines:
+            if len(lines) == 1 and lines[0].isdigit():
+                num_cities = int(lines[0])
+                if num_cities >= len(citiesIn):
+                    citiesOut = citiesIn
+                else:
+                    citiesOut = random.sample(citiesIn, num_cities)
+            else:
+                selected_names = {line for line in lines}
+                citiesOut = [city for city in citiesIn if city['cityName'] in selected_names]
+
+    print(citiesOut)
     return citiesOut
 
 # Get the necessary info about the point for further computing (x, y, name).

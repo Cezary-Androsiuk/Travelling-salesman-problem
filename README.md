@@ -22,4 +22,4 @@ python main.py
 ```xPos yPos cityName population```
 
 ## Selection
-In the file ```Selection.txt```, place the names of the cities you want to use, or a single number specifying how many cities the algorithm should randomly select. Leave the file empty or delete it if you don't want any selection and wish to use all cities.
+In the file ```selection.txt```, place the names of the cities you want to use, or a single number specifying how many cities the algorithm should randomly select. Leave the file empty or delete it if you don't want any selection and wish to use all cities.

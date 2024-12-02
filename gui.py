@@ -23,7 +23,7 @@ REALISTIC_DISTANCE_RATIO_KM = 573.17/1603.5841106721
 
 
 originalDataSize = (2000, 2000)
-windowSize = (900, 900)
+windowSize = (700, 700)
 
 
 def startFunction(outputQueue, runtimeQueue, data, dataHandler):
