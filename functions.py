@@ -33,6 +33,7 @@ def readData(citiesFilePath):
 
     return randomizeInputData(cities)
 
+
 def trimData(citiesIn):
     citiesOut = citiesIn
     selection_file = "selection.txt"
@@ -42,19 +43,29 @@ def trimData(citiesIn):
             lines = [line.strip() for line in file if line.strip()]
 
         if lines:
-            if len(lines) == 1 and lines[0].isdigit():
-                num_cities = int(lines[0])
-                if num_cities >= len(citiesIn):
-                    citiesOut = citiesIn
-                else:
-                    citiesOut = random.sample(citiesIn, num_cities)
+            if len(lines) == 1:
+                single_line = lines[0]
+
+                if single_line.isdigit():
+                    num_cities = int(single_line)
+                    if num_cities >= len(citiesIn):
+                        citiesOut = citiesIn
+                    else:
+                        citiesOut = random.sample(citiesIn, num_cities)
+
+                elif 'p' in single_line:
+                    parts = single_line.split()
+                    if len(parts) == 2 and parts[0].isdigit() and parts[1] == 'p':
+                        num_cities = int(parts[0])
+                        sorted_cities = sorted(citiesIn, key=lambda city: city['population'], reverse=True)
+                        citiesOut = sorted_cities[:num_cities]
+
             else:
                 selected_names = {line for line in lines}
                 citiesOut = [city for city in citiesIn if city['cityName'] in selected_names]
 
     print(citiesOut)
     return citiesOut
-
 # Get the necessary info about the point for further computing (x, y, name).
 def getPoints(citiesIn):
     points = []
