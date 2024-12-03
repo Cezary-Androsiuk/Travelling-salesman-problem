@@ -31,7 +31,8 @@ def readData(citiesFilePath):
     except Exception as e:
         print(f"Cannot open {citiesFilePath}: {e}")
 
-    return randomizeInputData(cities)
+    #return randomizeInputData(cities)
+    return cities
 
 
 def trimData(citiesIn):
@@ -51,7 +52,8 @@ def trimData(citiesIn):
                     if num_cities >= len(citiesIn):
                         citiesOut = citiesIn
                     else:
-                        citiesOut = random.sample(citiesIn, num_cities)
+                        #citiesOut = random.sample(citiesIn, num_cities)
+                        citiesOut = citiesIn [:num_cities]
 
                 elif 'p' in single_line:
                     parts = single_line.split()
@@ -90,7 +92,7 @@ def computePaths(citiesIn, guiQueue: queue.Queue):
     distanceMatrix = getDistanceMatrix(points)
 
     # Run ACO algorithm
-    aco = ACO(distanceMatrix, points, 10, 5, 100, 0.95, 1, 1)  # Adjusted parameters
+    aco = ACO(distanceMatrix, points, 25, 10, 400, 0.95, 1, 1)  # Adjusted parameters
     shortest = aco.run(guiQueue)
 
     shortest_indices = shortest[0]  # Indices of cities in the shortest path

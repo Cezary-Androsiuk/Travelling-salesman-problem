@@ -55,10 +55,10 @@ class ACO(object):
             print(f"Points: {path_data['points']}")
             print(f"Distances: {path_data['distances']}")
             print(f"Total distance: {total_distance:.2f}\n")
-            guiQueue.put(path_data['points'])
 
             # Update all-time shortest path
             if total_distance < all_time_shortest_path[1]:
+                guiQueue.put(path_data['points'])
                 all_time_shortest_path = shortest_path
 
             self.pheromone = self.pheromone * self.decay
